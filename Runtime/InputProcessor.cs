@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,7 +12,10 @@ namespace Popieyes.Input
         public InputActionAsset InputActions;
         InputAction moveAction;
         InputAction lookAction;
+        InputAction attackAction;
         InputAction interactAction;
+        InputAction crouchAction;
+        InputAction jumpAction;
         InputAction sprintAction;
 
         Vector2 _input;
@@ -22,9 +26,16 @@ namespace Popieyes.Input
         #endregion
 
         #region Events
-        public event Action OnInteract;
+        public event Action OnAttackPerformed;
+        public event Action OnAttackCanceled;
+        public event Action OnInteractPerformed;
+        public event Action OnInteractCanceled;
+        public event Action OnCrouchPerformed;
+        public event Action OnCrouchCanceled;
+        public event Action OnJumpPerformed;
+        public event Action OnJumpCanceled;
         public event Action OnSprintPerformed;
-        public event Action OnSprintCancelled;
+        public event Action OnSprintCanceled;
         #endregion
 
         #region Unity Callbacks
@@ -39,13 +50,21 @@ namespace Popieyes.Input
         }
         void Awake()
         {
-            moveAction = InputSystem.actions.FindAction("Move");
-            lookAction = InputSystem.actions.FindAction("Look");
-            interactAction = InputSystem.actions.FindAction("Interact");
-            sprintAction = InputSystem.actions.FindAction("Sprint");
-            Debug.Assert(interactAction != null, "Interact Action is null in InputProcessor");
+            InitializeInputActions();
 
-            sprintAction.performed += OnSprint;
+            attackAction.performed += (ctx) => OnAttackPerformed?.Invoke();
+            interactAction.performed += (ctx) => OnInteractPerformed?.Invoke();
+            sprintAction.performed += (ctx) => OnSprintPerformed?.Invoke();
+            crouchAction.performed += (ctx) => OnCrouchPerformed?.Invoke();
+            jumpAction.performed += (ctx) => OnJumpPerformed?.Invoke();
+
+            
+            attackAction.canceled += (ctx) => OnAttackCanceled?.Invoke();
+            interactAction.canceled += (ctx) => OnInteractCanceled?.Invoke();
+            sprintAction.canceled += (ctx) => OnSprintCanceled?.Invoke();
+            crouchAction.canceled += (ctx) => OnCrouchCanceled?.Invoke();
+            jumpAction.canceled += (ctx) => OnJumpCanceled?.Invoke();
+            
         }
 
         void Start()
@@ -57,10 +76,6 @@ namespace Popieyes.Input
         {
             _input = moveAction.ReadValue<Vector2>();
             _look = lookAction.ReadValue<Vector2>();
-            if(interactAction.WasPerformedThisFrame())
-            {
-                OnInteract?.Invoke();
-            }
         }
 
 
@@ -76,23 +91,23 @@ namespace Popieyes.Input
         #endregion
 
         #region Custom Functions
-        void OnSprint(InputAction.CallbackContext context)
-        {   
-            switch(context.phase)
+        void InitializeInputActions()
+        {
+            FieldInfo[] fields = GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
+            foreach(FieldInfo field in fields)
             {
-                case InputActionPhase.Performed:
-                    OnSprintPerformed.Invoke();
-                    Debug.Log("Sprint is triggered");
-                    break;
-                case InputActionPhase.Canceled:
-                    OnSprintCancelled.Invoke();
-                    Debug.Log("Sprint is cancelled");
-                    break;
-                default:
-                break;
+                if(field.Name.EndsWith("Action") && field.FieldType == typeof(InputAction))
+                {
+                    string actionName = char.ToUpper(field.Name[0]) + field.Name.Substring(1).Replace("Action","");
+                    InputAction foundAction = InputSystem.actions.FindAction(actionName);
+                    Debug.Assert(foundAction != null, $"[InputProcessor] Action '{actionName}' not found in Input Asset for field '{field.Name}'");
+                    field.SetValue(this, foundAction);
+                }
             }
-            
         }
+
+       
+     
         #endregion
     }
 }
