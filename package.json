@@ -1,11 +1,11 @@
 {
-    "name": "com.popieyes.input",
-    "version": "1.0.0",
+    "name": "com.teamkronos.input",
+    "version": "1.0.1",
     "displayName": "Input Processor",
     "description": "Provides reusable modules for processing Unity Input System",
     "unity": "6000.2",
     "author": {
-        "name": "Santiago Meneses Gómez",
+        "name": "Team Kronos",
         "email": "dragonier2013@gmail.com"
     }
 }

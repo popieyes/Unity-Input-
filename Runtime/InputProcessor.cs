@@ -17,6 +17,7 @@ namespace Popieyes.Input
         InputAction crouchAction;
         InputAction jumpAction;
         InputAction sprintAction;
+        InputAction aimAction;
 
         Vector2 _input;
         Vector2 _look;
@@ -36,6 +37,8 @@ namespace Popieyes.Input
         public event Action OnJumpCanceled;
         public event Action OnSprintPerformed;
         public event Action OnSprintCanceled;
+        public event Action OnAimPerformed;
+        public event Action OnAimCanceled;
         #endregion
 
         #region Unity Callbacks
@@ -57,6 +60,7 @@ namespace Popieyes.Input
             sprintAction.performed += (ctx) => OnSprintPerformed?.Invoke();
             crouchAction.performed += (ctx) => OnCrouchPerformed?.Invoke();
             jumpAction.performed += (ctx) => OnJumpPerformed?.Invoke();
+            aimAction.performed += (ctx) => OnAimPerformed?.Invoke();
 
             
             attackAction.canceled += (ctx) => OnAttackCanceled?.Invoke();
@@ -64,29 +68,13 @@ namespace Popieyes.Input
             sprintAction.canceled += (ctx) => OnSprintCanceled?.Invoke();
             crouchAction.canceled += (ctx) => OnCrouchCanceled?.Invoke();
             jumpAction.canceled += (ctx) => OnJumpCanceled?.Invoke();
+            aimAction.performed += (ctx) => OnAimCanceled?.Invoke();
             
         }
-
-        void Start()
-        {
-            
-        }
-
         void Update()
         {
             _input = moveAction.ReadValue<Vector2>();
             _look = lookAction.ReadValue<Vector2>();
-        }
-
-
-        void FixedUpdate()
-        {
-
-        }
-
-        void LateUpdate()
-        {
-            
         }
         #endregion
 
@@ -99,7 +87,7 @@ namespace Popieyes.Input
                 if(field.Name.EndsWith("Action") && field.FieldType == typeof(InputAction))
                 {
                     string actionName = char.ToUpper(field.Name[0]) + field.Name.Substring(1).Replace("Action","");
-                    InputAction foundAction = InputSystem.actions.FindAction(actionName);
+                    InputAction foundAction = InputActions.FindAction(actionName);
                     Debug.Assert(foundAction != null, $"[InputProcessor] Action '{actionName}' not found in Input Asset for field '{field.Name}'");
                     field.SetValue(this, foundAction);
                 }
