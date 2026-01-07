@@ -1,9 +1,8 @@
 {
-    "name": "Kronos.Input",
-    "rootNamespace": "Kronos.Input",
+    "name": "Kronos.Input.Editor",
+    "rootNamespace": "Kronos.Input.Editor",
     "references": [
-        "GUID:75469ad4d38634e559750d17036d5f7c",
-        "GUID:1491147abca9d7d4bb7105af628b223e"
+        "GUID:75469ad4d38634e559750d17036d5f7c"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
