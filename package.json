@@ -1,7 +1,7 @@
 {
     "name": "com.teamkronos.input",
     "displayName": "Input Processor",
-    "version": "0.0.4",
+    "version": "1.0.0",
     "description": "Provides reusable modules for processing Unity Input System",
     "unity": "6000.2",
     "author": {
